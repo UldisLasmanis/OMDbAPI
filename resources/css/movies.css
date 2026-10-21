@@ -12,11 +12,17 @@ body {
 .container {
     width: min(1100px, calc(100% - 40px));
     margin: 40px auto;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
 }
 
-h1 {
-    font-size: 36px;
-    margin-bottom: 8px;
+.page-title {
+    font-size: 2.25rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
 }
 
 .introduction {
@@ -92,6 +98,9 @@ h1 {
 }
 
 .movie {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
     overflow: hidden;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -118,16 +127,43 @@ h1 {
 
 .movie-details {
     padding: 15px;
+    flex: 1;
 }
 
 .movie-title {
     margin: 0 0 10px;
-    font-size: 18px;
+    font-size: 1.12rem;
+    min-height: 2.7em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 .movie-meta {
+    font-size: 0.875rem;
     margin: 0 0 10px;
     color: #555;
+}
+
+.pagination-wrapper {
+    margin-top: auto;
+    padding-top: 32px;
+}
+
+.pagination-wrapper nav > div {
+    justify-content: center;
+}
+
+@media (min-width: 640px) {
+    .pagination-wrapper nav > div:last-child {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .pagination-wrapper nav > div:last-child > div:first-child {
+        text-align: center;
+    }
 }
 
 @media (max-width: 600px) {

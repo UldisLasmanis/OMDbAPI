@@ -9,13 +9,17 @@ use RuntimeException;
 
 class OmdbClient
 {
+    public const int RESULTS_PER_PAGE = 10;
+    public const int MAX_PAGE = 100;
+    public const int MAX_ACCESSIBLE_RESULTS = 1_000;
+
     public function __construct(
         private readonly Factory $http,
         private readonly string $apiKey,
         private readonly string $baseUrl,
     ) {}
 
-    public function searchByTitle(string $searchBy): array
+    public function searchByTitle(string $searchBy, int $page): array
     {
         $data = $this->http
             ->baseUrl($this->baseUrl)
@@ -23,6 +27,7 @@ class OmdbClient
             ->get('/', [
                 'apikey' => $this->apiKey,
                 's' => $searchBy,
+                'page' => $page,
             ])
             ->throw()
             ->json();

@@ -1,7 +1,7 @@
 @extends('layouts.movies')
 
 @section('content')
-    <h1>Movie Search</h1>
+    <h1 class="page-title">Movie Search</h1>
 
     <p class="introduction">
         Search for movies, series, and episodes using OMDb
@@ -30,6 +30,13 @@
         </button>
     </form>
 
+    @if ($moviesFoundTotal > 1000)
+        <p class="info-msg">
+            We found {{ number_format($moviesFoundTotal) }} matches.
+            You can browse the first 1,000 results. Try a more specific search to narrow the results.
+        </p>
+    @endif
+
     @if ($errors->any())
         <ul class="validation-errors">
             @foreach ($errors->all() as $validationError)
@@ -42,9 +49,11 @@
         <p class="error-msg">
             {{ $error }}
         </p>
-    @elseif (!empty($movies))
+    @elseif ($movies?->count())
         <section aria-labelledby="results-heading">
-            <h2 id="results-heading">Search results</h2>
+            <h2 id="results-heading" class="section-title">
+                Search results
+            </h2>
 
             <div class="movies">
                 @foreach ($movies as $movie)
@@ -63,9 +72,9 @@
                         @endif
 
                         <div class="movie-details">
-                            <h2 class="movie-title">
+                            <h3 class="movie-title">
                                 {{ $movie['Title'] }}
-                            </h2>
+                            </h3>
 
                             <p class="movie-meta">
                                 {{ $movie['Year'] }} · {{ ucfirst($movie['Type']) }}
@@ -75,6 +84,10 @@
                 @endforeach
             </div>
         </section>
+
+        <div class="pagination-wrapper">
+            {{ $movies->onEachSide(1)->links() }}
+        </div>
     @elseif (request()->filled('query') && !$errors->any())
         <p class="info-msg">
             No movies were found containing “{{ request('query') }}”
