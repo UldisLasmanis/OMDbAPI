@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use Illuminate\Http\Client\Factory;
+use RuntimeException;
+
+class OmdbClient
+{
+    public function __construct(
+        private readonly Factory $http,
+        private readonly string $apiKey,
+        private readonly string $baseUrl,
+    ) {}
+
+    public function searchByTitle(string $searchBy): array
+    {
+        $data = $this->http
+            ->baseUrl($this->baseUrl)
+            ->retry(2, 200)
+            ->get('/', [
+                'apikey' => $this->apiKey,
+                's' => $searchBy,
+            ])
+            ->throw()
+            ->json();
+
+        if (($data['Response'] ?? 'False') === 'False') {
+            if (($data['Error'] ?? null) === 'Movie not found!') {
+                return [
+                    'Search' => [],
+                    'totalResults' => '0',
+                ];
+            }
+
+            throw new RuntimeException(
+                $data['Error'] ?? 'OMDb returned an unknown error',
+            );
+        }
+
+        return $data;
+    }
+}
