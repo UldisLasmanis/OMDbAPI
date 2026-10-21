@@ -64,7 +64,12 @@
                                 src="{{ $movie['Poster'] }}"
                                 alt="Poster for {{ $movie['Title'] }}"
                                 loading="lazy"
+                                data-movie-poster
                             >
+
+                            <div class="poster-placeholder" data-poster-placeholder hidden>
+                                No poster available
+                            </div>
                         @else
                             <div class="poster-placeholder">
                                 No poster available

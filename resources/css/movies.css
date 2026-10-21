@@ -125,6 +125,10 @@ body {
     color: #777;
 }
 
+.poster-placeholder[hidden] {
+    display: none;
+}
+
 .movie-details {
     padding: 15px;
     flex: 1;
