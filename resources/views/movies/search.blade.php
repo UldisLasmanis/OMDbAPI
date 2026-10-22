@@ -30,26 +30,70 @@
         </button>
     </form>
 
-    @if ($moviesFoundTotal > 1000)
-        <p class="info-msg">
-            We found {{ number_format($moviesFoundTotal) }} matches.
-            You can browse the first 1,000 results. Try a more specific search to narrow the results.
-        </p>
+    @php
+        $hasNoResults = $movies !== null
+            && $movies->isEmpty()
+            && request()->filled('query')
+            && empty($error)
+            && !$errors->any();
+
+        $hasMessages = $hasInaccessibleResults
+            || $errors->any()
+            || !empty($error)
+            || $hasNoResults;
+    @endphp
+
+    @if ($hasMessages)
+        <div class="message-block">
+            @if ($hasInaccessibleResults)
+                <p class="info-msg">
+                    We found {{ number_format($moviesFoundTotal) }} matches.
+                    You can browse the first {{ number_format($moviesAccessibleLimit) }} results.
+                    Try a more specific search to narrow the results.
+                </p>
+            @endif
+
+            @if ($errors->any())
+                <ul class="error-msg">
+                    @foreach ($errors->all() as $validationError)
+                        <li>{{ $validationError }}</li>
+                    @endforeach
+                </ul>
+            @endif
+
+            @if (! empty($error))
+                <p class="error-msg">
+                    {{ $error }}
+                </p>
+            @endif
+
+            @if ($hasNoResults)
+                <p class="info-msg">
+                    No movies were found containing “{{ request('query') }}”
+                </p>
+            @endif
+        </div>
     @endif
 
-    @if ($errors->any())
-        <ul class="validation-errors">
-            @foreach ($errors->all() as $validationError)
-                <li>{{ $validationError }}</li>
-            @endforeach
-        </ul>
+    @if ($recentSearches)
+        <details class="recent-searches">
+            <summary class="recent-searches-toggle">
+                Recent searches
+            </summary>
+
+            <ul class="recent-searches-list">
+                @foreach ($recentSearches as $recentQuery)
+                    <li>
+                        <a href="{{ route('movies.search', ['query' => $recentQuery]) }}">
+                            {{ $recentQuery }}
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </details>
     @endif
 
-    @if (!empty($error))
-        <p class="error-msg">
-            {{ $error }}
-        </p>
-    @elseif ($movies?->count())
+    @if ($movies?->count())
         <section aria-labelledby="results-heading">
             <h2 id="results-heading" class="section-title">
                 Search results
@@ -93,9 +137,5 @@
         <div class="pagination-wrapper">
             {{ $movies->onEachSide(1)->links() }}
         </div>
-    @elseif (request()->filled('query') && !$errors->any())
-        <p class="info-msg">
-            No movies were found containing “{{ request('query') }}”
-        </p>
     @endif
 @endsection

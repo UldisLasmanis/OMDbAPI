@@ -16,6 +16,7 @@ class MovieController
     {
         $movies = null;
         $error = null;
+        $moviesFoundTotal = 0;
 
         if ($request->exists('query')) {
             $validatedParams = $request->validate([
@@ -23,11 +24,17 @@ class MovieController
                 'page' => ['nullable', 'integer', 'min:1', 'max:' . OmdbClient::MAX_PAGE],
             ]);
 
+            $query = trim($validatedParams['query']);
             $page = (int) ($validatedParams['page'] ?? 1);
+
+            // A request without a page parameter is a new search, not pagination
+            if ($request->missing('page')) {
+                $this->rememberSearchQuery($request, $query);
+            }
 
             try {
                 $response = $omdbClient->searchByTitle(
-                    searchBy: $validatedParams['query'],
+                    searchBy: $query,
                     page: $page,
                 );
 
@@ -46,7 +53,7 @@ class MovieController
                 );
 
                 $movies->appends([
-                    'query' => $validatedParams['query'],
+                    'query' => $query,
                 ]);
             } catch (RuntimeException $exception) {
                 report($exception);
@@ -58,7 +65,22 @@ class MovieController
         return view('movies.search', [
             'movies' => $movies,
             'error' => $error,
-            'moviesFoundTotal' => $moviesFoundTotal ?? 0,
+            'moviesFoundTotal' => $moviesFoundTotal,
+            'moviesAccessibleLimit' => OmdbClient::MAX_ACCESSIBLE_RESULTS,
+            'hasInaccessibleResults' => $moviesFoundTotal > OmdbClient::MAX_ACCESSIBLE_RESULTS,
+            'recentSearches' => $request->session()->get('recent_movie_searches', []),
         ]);
+    }
+
+    private function rememberSearchQuery(Request $request, string $newQuery): void
+    {
+        $recentSearches = collect($request->session()->get('recent_movie_searches', []))
+            ->reject(static fn (string $recentQuery): bool => mb_strtolower($recentQuery) === mb_strtolower($newQuery))
+            ->prepend($newQuery)
+            ->take(5)
+            ->values()
+            ->all();
+
+        $request->session()->put('recent_movie_searches', $recentSearches);
     }
 }
