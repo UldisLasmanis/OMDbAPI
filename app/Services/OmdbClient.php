@@ -6,9 +6,11 @@ namespace App\Services;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Cache;
 use RuntimeException;
+use Throwable;
 
 class OmdbClient
 {
@@ -41,9 +43,7 @@ class OmdbClient
             return $cachedResponse;
         }
 
-        $data = $this->http
-            ->baseUrl($this->baseUrl)
-            ->retry(2, 200)
+        $data = $this->createRequest()
             ->get('/', [
                 'apikey' => $this->apiKey,
                 's' => $searchBy,
@@ -86,9 +86,7 @@ class OmdbClient
             return $cachedResponse;
         }
 
-        $data = $this->http
-            ->baseUrl($this->baseUrl)
-            ->retry(2, 200)
+        $data = $this->createRequest()
             ->get('/', [
                 'apikey' => $this->apiKey,
                 'i' => $imdbId,
@@ -106,5 +104,33 @@ class OmdbClient
         Cache::put($cacheKey, $data, now()->addHour());
 
         return $data;
+    }
+
+    private function createRequest(): PendingRequest
+    {
+        return $this->http
+            ->createPendingRequest()
+            ->baseUrl($this->baseUrl)
+            ->connectTimeout(2)
+            ->timeout(5)
+            ->retry(
+                2,
+                200,
+                static function (Throwable $exception): bool {
+                    if ($exception instanceof ConnectionException) {
+                        return true;
+                    }
+
+                    if (! $exception instanceof RequestException) {
+                        return false;
+                    }
+
+                    return in_array(
+                        $exception->response->status(),
+                        [429, 500, 502, 503, 504],
+                        true,
+                    );
+                },
+            );
     }
 }
