@@ -6,13 +6,12 @@ searches, cached API responses, and individual title pages.
 
 ## Setup
 
-Requirements: PHP 8.3+, Composer, Node.js, npm, and an
+Requirements: PHP 8.4.1+, Composer, Node.js, npm, and an
 [OMDb API key](https://www.omdbapi.com/apikey.aspx).
 
 ```bash
 git clone <repository-url>
 cd OMDbAPI
-touch database/database.sqlite
 composer run setup
 ```
 
