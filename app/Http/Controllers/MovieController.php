@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\OmdbClient;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
@@ -55,7 +57,7 @@ class MovieController
                 $movies->appends([
                     'query' => $query,
                 ]);
-            } catch (RuntimeException $exception) {
+            } catch (RuntimeException|ConnectionException|RequestException $exception) {
                 report($exception);
 
                 $error = 'The service is temporarily unavailable. Please try again later.';
@@ -69,6 +71,25 @@ class MovieController
             'moviesAccessibleLimit' => OmdbClient::MAX_ACCESSIBLE_RESULTS,
             'hasInaccessibleResults' => $moviesFoundTotal > OmdbClient::MAX_ACCESSIBLE_RESULTS,
             'recentSearches' => $request->session()->get('recent_movie_searches', []),
+        ]);
+    }
+
+    public function show(string $imdbId, OmdbClient $omdbClient): View
+    {
+        $movie = null;
+        $error = null;
+
+        try {
+            $movie = $omdbClient->findById($imdbId);
+        } catch (RuntimeException|ConnectionException|RequestException $exception) {
+            report($exception);
+
+            $error = 'Movie details are temporarily unavailable. Please try again later.';
+        }
+
+        return view('movies.show', [
+            'movie' => $movie,
+            'error' => $error,
         ]);
     }
 

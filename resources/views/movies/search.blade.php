@@ -102,24 +102,35 @@
             <div class="movies">
                 @foreach ($movies as $movie)
                     <article class="movie">
-                        @if (($movie['Poster'] ?? 'N/A') !== 'N/A')
-                            <img
-                                class="movie-poster"
-                                src="{{ $movie['Poster'] }}"
-                                alt="Poster for {{ $movie['Title'] }}"
-                                loading="lazy"
-                                data-movie-poster
-                            >
+                        <a
+                            class="movie-link"
+                            href="{{ route('movies.show', ['imdbId' => $movie['imdbID']]) }}"
+                            data-movie-link
+                        >
+                            <div class="movie-poster-wrapper">
+                                @if (($movie['Poster'] ?? 'N/A') !== 'N/A')
+                                    <img
+                                        class="movie-poster"
+                                        src="{{ $movie['Poster'] }}"
+                                        alt="Poster for {{ $movie['Title'] }}"
+                                        loading="lazy"
+                                        data-movie-poster
+                                    >
 
-                            <div class="poster-placeholder" data-poster-placeholder hidden>
-                                No poster available
-                            </div>
-                        @else
-                            <div class="poster-placeholder">
-                                No poster available
-                            </div>
-                        @endif
+                                    <div class="poster-placeholder" data-poster-placeholder hidden>
+                                        No poster available
+                                    </div>
+                                @else
+                                    <div class="poster-placeholder">
+                                        No poster available
+                                    </div>
+                                @endif
 
+                                <span class="movie-poster-overlay" aria-hidden="true">
+                                    <span class="movie-view-button">View</span>
+                                </span>
+                            </div>
+                        </a>
                         <div class="movie-details">
                             <h3 class="movie-title">
                                 {{ $movie['Title'] }}

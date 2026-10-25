@@ -1,3 +1,5 @@
+/* Shared */
+
 * {
     box-sizing: border-box;
 }
@@ -24,6 +26,8 @@ body {
 .section-title {
     font-size: 1.5rem;
 }
+
+/* Search results */
 
 .introduction {
     margin-top: 0;
@@ -106,6 +110,28 @@ body {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
+.movie-link {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    color: inherit;
+    text-decoration: none;
+}
+
+.movie-link:hover .movie-title {
+    text-decoration: underline;
+}
+
+.movie-link:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: -3px;
+}
+
+.movie-poster-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
 .movie-poster {
     width: 100%;
     aspect-ratio: 2 / 3;
@@ -125,6 +151,28 @@ body {
 
 .poster-placeholder[hidden] {
     display: none;
+}
+
+.movie-poster-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+}
+
+.movie-link:hover .movie-poster-overlay,
+.movie-link:focus-visible .movie-poster-overlay {
+    opacity: 1;
+}
+
+.movie-view-button {
+    padding: 10px 22px;
+    border-radius: 6px;
+    background: white;
+    color: #222;
+    font-weight: 700;
 }
 
 .movie-details {
@@ -188,6 +236,68 @@ body {
     background-color: #d1d5db;
 }
 
+/* Movie details */
+
+.back-link {
+    margin-bottom: 24px;
+}
+
+.movie-page {
+    display: flex;
+    align-items: start;
+    gap: 32px;
+}
+
+.movie-page-poster-wrapper {
+    width: 300px;
+}
+
+.movie-page-content {
+    flex: 1;
+}
+
+.movie-page-poster,
+.movie-page-poster-wrapper .poster-placeholder {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+}
+
+.movie-page-poster {
+    display: block;
+    object-fit: contain;
+    background: #e5e5e5;
+}
+
+.movie-page-title {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.imdb-rating-star {
+    color: #f5c518;
+}
+
+.movie-page-plot {
+    margin-top: 16px;
+}
+
+.movie-facts {
+    margin-top: 24px;
+}
+
+.movie-fact {
+    display: flex;
+    gap: 12px;
+    margin: 0 0 12px;
+}
+
+.movie-fact strong {
+    width: 130px;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+
 @media (min-width: 640px) {
     .pagination-wrapper nav > div:last-child {
         flex-direction: column;
@@ -211,5 +321,20 @@ body {
 
     .search-form .button {
         width: 100%;
+    }
+
+    .movie-page {
+        flex-direction: column;
+    }
+
+    .movie-page-poster-wrapper {
+        width: 100%;
+        max-width: 300px;
+        margin-inline: auto;
+    }
+
+    .movie-fact {
+        flex-direction: column;
+        gap: 4px;
     }
 }

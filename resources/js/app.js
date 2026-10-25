@@ -18,3 +18,18 @@ document.querySelectorAll('[data-movie-poster]').forEach((poster) => {
         showPlaceholder();
     }
 });
+
+const searchResultsUrlKey = 'movieSearchResultsUrl';
+
+document.querySelectorAll('[data-movie-link]').forEach((movieLink) => {
+    movieLink.addEventListener('click', () => {
+        sessionStorage.setItem(searchResultsUrlKey, window.location.href);
+    });
+});
+
+const backToSearchLink = document.querySelector('[data-back-to-search]');
+const searchResultsUrl = sessionStorage.getItem(searchResultsUrlKey);
+
+if (backToSearchLink && searchResultsUrl) {
+    backToSearchLink.href = searchResultsUrl;
+}
