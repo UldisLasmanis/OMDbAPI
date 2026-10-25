@@ -22,7 +22,6 @@ class OmdbClientTest extends TestCase
         parent::setUp();
 
         config([
-            'services.omdb.key' => 'test-api-key',
             'services.omdb.base_url' => self::OMDB_BASE_URL,
         ]);
     }
