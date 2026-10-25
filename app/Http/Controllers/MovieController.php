@@ -40,12 +40,12 @@ class MovieController
                     page: $page,
                 );
 
-                $moviesFoundTotal = (int) ($response['totalResults'] ?? 0);
+                $moviesFoundTotal = $response->totalResults;
                 // OMDbAPI returns 10 results per page for a maximum of 100 pages
                 $moviesAccessibleTotal = min($moviesFoundTotal, OmdbClient::MAX_ACCESSIBLE_RESULTS);
 
                 $movies = new LengthAwarePaginator(
-                    items: $response['Search'] ?? [],
+                    items: collect($response->movies),
                     total: $moviesAccessibleTotal,
                     perPage: OmdbClient::RESULTS_PER_PAGE,
                     currentPage: $page,

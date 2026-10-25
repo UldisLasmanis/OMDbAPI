@@ -1,3 +1,7 @@
+@php
+    /** @var \Illuminate\Pagination\LengthAwarePaginator<int, \App\Data\MovieSearchResult>|null $movies */
+@endphp
+
 @extends('layouts.movies')
 
 @section('content')
@@ -104,15 +108,15 @@
                     <article class="movie">
                         <a
                             class="movie-link"
-                            href="{{ route('movies.show', ['imdbId' => $movie['imdbID']]) }}"
+                            href="{{ route('movies.show', ['imdbId' => $movie->imdbId]) }}"
                             data-movie-link
                         >
                             <div class="movie-poster-wrapper">
-                                @if (($movie['Poster'] ?? 'N/A') !== 'N/A')
+                                @if ($movie->poster)
                                     <img
                                         class="movie-poster"
-                                        src="{{ $movie['Poster'] }}"
-                                        alt="Poster for {{ $movie['Title'] }}"
+                                        src="{{ $movie->poster }}"
+                                        alt="Poster for {{ $movie->title }}"
                                         loading="lazy"
                                         data-movie-poster
                                     >
@@ -133,11 +137,11 @@
                         </a>
                         <div class="movie-details">
                             <h3 class="movie-title">
-                                {{ $movie['Title'] }}
+                                {{ $movie->title }}
                             </h3>
 
                             <p class="movie-meta">
-                                {{ $movie['Year'] }} · {{ ucfirst($movie['Type']) }}
+                                {{ $movie->year }} · {{ ucfirst($movie->type) }}
                             </p>
                         </div>
                     </article>

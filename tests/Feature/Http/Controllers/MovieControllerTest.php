@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Http\Controllers;
 
+use App\Data\MovieDetails;
 use Illuminate\Http\Client\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Exceptions;
@@ -385,7 +386,10 @@ class MovieControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertViewIs('movies.show')
-            ->assertViewHas('movie', $movieDetails)
+            ->assertViewHas(
+                'movie',
+                static fn (MovieDetails $movie): bool => $movie->imdbId === 'tt0903747',
+            )
             ->assertSeeText('Breaking Bad')
             ->assertSeeText('2008–2013')
             ->assertSeeText('Series')
@@ -401,6 +405,8 @@ class MovieControllerTest extends TestCase
             ->assertSeeText('English, Spanish')
             ->assertSeeText('United States')
             ->assertSeeText('Won 16 Primetime Emmys. 172 wins & 269 nominations total')
+            ->assertDontSeeText('Director')
+            ->assertDontSeeText('N/A')
             ->assertSee('https://example.com/breaking-bad.jpg');
 
         Http::assertSent(

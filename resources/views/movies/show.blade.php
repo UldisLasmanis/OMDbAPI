@@ -1,3 +1,7 @@
+@php
+    /** @var \App\Data\MovieDetails|null $movie */
+@endphp
+
 @extends('layouts.movies')
 
 @section('content')
@@ -12,11 +16,11 @@
     @elseif ($movie)
         <article class="movie-page">
             <div class="movie-page-poster-wrapper">
-                @if (($movie['Poster'] ?? 'N/A') !== 'N/A')
+                @if ($movie->poster)
                     <img
                         class="movie-page-poster"
-                        src="{{ $movie['Poster'] }}"
-                        alt="Poster for {{ $movie['Title'] }}"
+                        src="{{ $movie->poster }}"
+                        alt="Poster for {{ $movie->title }}"
                         data-movie-poster
                     >
 
@@ -32,70 +36,64 @@
 
             <div class="movie-page-content">
                 <h1 class="page-title movie-page-title">
-                    {{ $movie['Title'] }}
+                    {{ $movie->title }}
                 </h1>
 
-                @php
-                    $ratings = array_column($movie['Ratings'] ?? [], 'Value', 'Source');
-                    $rottenTomatoesRating = $ratings['Rotten Tomatoes'] ?? null;
-                    $hasImdbRating = ($movie['imdbRating'] ?? 'N/A') !== 'N/A';
-                @endphp
-
                 <p class="movie-page-summary">
-                    {{ $movie['Year'] }}
+                    {{ $movie->year }}
 
-                    @if (($movie['Type'] ?? 'N/A') !== 'N/A')
-                        · {{ ucfirst($movie['Type']) }}
+                    @if ($movie->type)
+                        · {{ ucfirst($movie->type) }}
                     @endif
 
-                    @if (($movie['Runtime'] ?? 'N/A') !== 'N/A')
-                        · {{ $movie['Runtime'] }}
+                    @if ($movie->runtime)
+                        · {{ $movie->runtime }}
                     @endif
                 </p>
 
-                @if ($hasImdbRating || $rottenTomatoesRating)
+                @if ($movie->imdbRating || $movie->rottenTomatoesRating)
                     <span>
-                        @if ($hasImdbRating)
+                        @if ($movie->imdbRating)
                             IMDb
-                            {{ $movie['imdbRating'] }}/10
+                            {{ $movie->imdbRating }}/10
                             <span class="imdb-rating-star" aria-hidden="true">★</span>
-                            @if (($movie['imdbVotes'] ?? 'N/A') !== 'N/A')
-                                ({{ $movie['imdbVotes'] }})
+                            @if ($movie->imdbVotes)
+                                ({{ $movie->imdbVotes }})
                             @endif
                         @endif
 
-                        @if ($hasImdbRating && $rottenTomatoesRating)
+                        @if ($movie->imdbRating && $movie->rottenTomatoesRating)
                             ·
                         @endif
 
-                        @if ($rottenTomatoesRating)
-                            <span aria-label="Rotten Tomatoes rating: {{ $rottenTomatoesRating }}">
-                                <span aria-hidden="true">🍅</span> {{ $rottenTomatoesRating }}
+                        @if ($movie->rottenTomatoesRating)
+                            <span aria-label="Rotten Tomatoes rating: {{ $movie->rottenTomatoesRating }}">
+                                <span aria-hidden="true">🍅</span> {{ $movie->rottenTomatoesRating }}
                             </span>
                         @endif
                     </span>
                 @endif
 
-                @if (($movie['Plot'] ?? 'N/A') !== 'N/A')
+                @if ($movie->plot)
                     <p class="movie-page-plot">
-                        {{ $movie['Plot'] }}
+                        {{ $movie->plot }}
                     </p>
                 @endif
 
                 <div class="movie-facts">
                     @foreach ([
-                        'Genre' => 'Genre',
-                        'Director' => 'Director',
-                        'Writer' => 'Writer',
-                        'Actors' => 'Actors',
-                        'Language' => 'Language',
-                        'Country' => 'Country',
-                        'Awards' => 'Awards',
-                    ] as $field => $label)
-                        @if (($movie[$field] ?? 'N/A') !== 'N/A')
+                        'Genre' => $movie->genre,
+                        'Director' => $movie->director,
+                        'Writer' => $movie->writer,
+                        'Actors' => $movie->actors,
+                        'Language' => $movie->language,
+                        'Country' => $movie->country,
+                        'Awards' => $movie->awards,
+                    ] as $label => $value)
+                        @if ($value)
                             <div class="movie-fact">
                                 <strong>{{ $label }}</strong>
-                                <span>{{ $movie[$field] }}</span>
+                                <span>{{ $value }}</span>
                             </div>
                         @endif
                     @endforeach

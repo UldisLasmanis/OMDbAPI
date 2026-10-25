@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Services;
 
+use App\Data\MovieDetails;
+use App\Data\MovieSearchResponse;
 use App\Services\OmdbClient;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -51,7 +53,11 @@ class OmdbClientTest extends TestCase
             page: 2,
         );
 
-        $this->assertSame($omdbResponse, $result);
+        $this->assertInstanceOf(MovieSearchResponse::class, $result);
+        $this->assertSame(1, $result->totalResults);
+        $this->assertCount(1, $result->movies);
+        $this->assertSame('Breaking Bad', $result->movies[0]->title);
+        $this->assertSame('tt0903747', $result->movies[0]->imdbId);
 
         Http::assertSent(
             static fn (Request $request): bool => $request->method() === 'GET'
@@ -197,7 +203,11 @@ class OmdbClientTest extends TestCase
 
         $result = app(OmdbClient::class)->findById('tt0903747');
 
-        $this->assertSame($movieDetails, $result);
+        $this->assertInstanceOf(MovieDetails::class, $result);
+        $this->assertSame('Breaking Bad', $result->title);
+        $this->assertSame('49 min', $result->runtime);
+        $this->assertSame('tt0903747', $result->imdbId);
+        $this->assertSame('series', $result->type);
 
         Http::assertSent(
             static fn (Request $request): bool => $request->method() === 'GET'
@@ -227,8 +237,11 @@ class OmdbClientTest extends TestCase
         $firstResult = $omdbClient->findById('tt0903747');
         $secondResult = $omdbClient->findById('tt0903747');
 
-        $this->assertSame($omdbResponse, $firstResult);
-        $this->assertSame($omdbResponse, $secondResult);
+        $this->assertSame('tt0903747', $firstResult->imdbId);
+        $this->assertSame('Breaking Bad', $firstResult->title);
+
+        $this->assertSame('tt0903747', $secondResult->imdbId);
+        $this->assertSame('Breaking Bad', $secondResult->title);
 
         Http::assertSentCount(1);
     }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Data\MovieDetails;
+use App\Data\MovieSearchResponse;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\PendingRequest;
@@ -30,7 +32,7 @@ class OmdbClient
      * @throws ConnectionException
      * @throws RequestException
      */
-    public function searchByTitle(string $searchBy, int $page): array
+    public function searchByTitle(string $searchBy, int $page): MovieSearchResponse
     {
         $cacheKey = sprintf(
             'omdb:search:%s:page:%d',
@@ -40,7 +42,7 @@ class OmdbClient
 
         $cachedResponse = Cache::get($cacheKey);
         if (is_array($cachedResponse)) {
-            return $cachedResponse;
+            return MovieSearchResponse::fromOmdb($cachedResponse);
         }
 
         $data = $this->createRequest()
@@ -67,14 +69,14 @@ class OmdbClient
 
         Cache::put($cacheKey, $data, now()->addHour());
 
-        return $data;
+        return MovieSearchResponse::fromOmdb($data);
     }
 
     /**
      * @throws ConnectionException
      * @throws RequestException
      */
-    public function findById(string $imdbId): array
+    public function findById(string $imdbId): MovieDetails
     {
         $cacheKey = sprintf(
             'omdb:movie:%s',
@@ -83,7 +85,7 @@ class OmdbClient
 
         $cachedResponse = Cache::get($cacheKey);
         if (is_array($cachedResponse)) {
-            return $cachedResponse;
+            return MovieDetails::fromOmdb($cachedResponse);
         }
 
         $data = $this->createRequest()
@@ -103,7 +105,7 @@ class OmdbClient
 
         Cache::put($cacheKey, $data, now()->addHour());
 
-        return $data;
+        return MovieDetails::fromOmdb($data);
     }
 
     private function createRequest(): PendingRequest
