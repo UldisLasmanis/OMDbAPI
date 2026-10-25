@@ -7,6 +7,7 @@ namespace App\Services;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Cache;
 use RuntimeException;
 
 class OmdbClient
@@ -14,6 +15,7 @@ class OmdbClient
     public const int RESULTS_PER_PAGE = 10;
     public const int MAX_PAGE = 100;
     public const int MAX_ACCESSIBLE_RESULTS = 1_000;
+
     private const string UNKNOWN_ERROR = 'OMDb returned an unknown error';
 
     public function __construct(
@@ -28,6 +30,17 @@ class OmdbClient
      */
     public function searchByTitle(string $searchBy, int $page): array
     {
+        $cacheKey = sprintf(
+            'omdb:search:%s:page:%d',
+            mb_strtolower(trim($searchBy)),
+            $page,
+        );
+
+        $cachedResponse = Cache::get($cacheKey);
+        if (is_array($cachedResponse)) {
+            return $cachedResponse;
+        }
+
         $data = $this->http
             ->baseUrl($this->baseUrl)
             ->retry(2, 200)
@@ -41,16 +54,18 @@ class OmdbClient
 
         if (($data['Response'] ?? 'False') === 'False') {
             if (($data['Error'] ?? null) === 'Movie not found!') {
-                return [
+                $data = [
                     'Search' => [],
                     'totalResults' => '0',
                 ];
+            } else {
+                throw new RuntimeException(
+                    $data['Error'] ?? self::UNKNOWN_ERROR,
+                );
             }
-
-            throw new RuntimeException(
-                $data['Error'] ?? self::UNKNOWN_ERROR,
-            );
         }
+
+        Cache::put($cacheKey, $data, now()->addHour());
 
         return $data;
     }
@@ -61,6 +76,16 @@ class OmdbClient
      */
     public function findById(string $imdbId): array
     {
+        $cacheKey = sprintf(
+            'omdb:movie:%s',
+            mb_strtolower($imdbId),
+        );
+
+        $cachedResponse = Cache::get($cacheKey);
+        if (is_array($cachedResponse)) {
+            return $cachedResponse;
+        }
+
         $data = $this->http
             ->baseUrl($this->baseUrl)
             ->retry(2, 200)
@@ -77,6 +102,8 @@ class OmdbClient
                 $data['Error'] ?? self::UNKNOWN_ERROR,
             );
         }
+
+        Cache::put($cacheKey, $data, now()->addHour());
 
         return $data;
     }
